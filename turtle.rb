@@ -143,15 +143,16 @@ class Turtle
     str.split("\n").each { |line| (line =~ /REPEAT/ ? repeat(line) : process_cmd(line)) } 
   end
 
-  t = Turtle.new
-
-  # Usage: cat afile.logo | ruby turtle.rb
-  ARGF.each_with_index do |line, idx|
-    break if idx == 0 && line.to_i == 0 #i.e., if rspec
-    t.canvas.size = line.to_i if idx == 0
-    t.process(line) if idx > 1
-  end
-
-  puts t
-
 end
+
+t = Turtle.new
+
+# Usage: cat afile.logo | ruby turtle.rb
+ARGF.each_with_index do |line, idx|
+  break if idx == 0 && line.to_i == 0 #i.e., if rspec
+  t.canvas.size = line.to_i if idx == 0
+  t.process(line) if idx > 1
+end
+
+puts t
+
