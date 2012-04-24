@@ -61,7 +61,6 @@ class Turtle
   def rotate(degrees)
     @orientation += degrees 
     @orientation = @orientation % 360
-    @orientation
   end
 
   def size=(s)
@@ -155,4 +154,3 @@ ARGF.each_with_index do |line, idx|
 end
 
 puts t
-

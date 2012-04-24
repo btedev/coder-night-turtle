@@ -149,4 +149,5 @@ describe Turtle do
       subject.canvas.contains?(5, 5).should be_true
     end
   end
+
 end
