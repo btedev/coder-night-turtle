@@ -8,25 +8,6 @@ describe Canvas do
     subject.size.should == 3
   end
 
-  it "adds points to the points array" do
-    subject.add(2, 2)
-    subject.points.should include([2, 2])
-  end
-
-  it "defines the last point added" do
-    subject.add(2, 1)
-    subject.last.should == [2, 1]
-  end
-
-  it "prevents points from being added out of bounds" do
-    expect { subject.add(5, 5) }.to raise_error(/exceeds the canvas bounds/)
-  end
-
-  it "creates a center point when the canvas is sized" do
-    subject.points.size.should == 1
-    subject.points.should include([1, 1])
-  end
-
   it "determines whether the points array contains a point" do
     subject.contains?(1, 1).should be_true
     subject.contains?(2, 0).should be_false
@@ -34,10 +15,19 @@ describe Canvas do
     subject.contains?(2, 0).should be_true
   end
 
-  it "creates a hash representation of points keyed by y" do
-    subject.add(1,2)
-    subject.add(2,2)
-    subject.to_h[2].should == [1,2]
+  it "adds points to the canvas" do
+    subject.add(2, 2)
+    subject.contains?(2,2)
+  end
+
+  it "defines the last point added" do
+    subject.add(2, 1)
+    subject.last.should == [2, 1]
+  end
+
+  it "creates a center point when the canvas is sized" do
+    subject.points.size.should == 1
+    subject.contains?(1, 1)
   end
 
   it "prints the canvas" do
@@ -74,9 +64,9 @@ describe Turtle do
     end
 
     it "turns right" do
-      subject.right(270).should == 270 
+      subject.right(270).should == 270
     end
-    
+
     it "turns left" do
       subject.left(270).should == 90
     end
@@ -86,7 +76,9 @@ describe Turtle do
   describe "movement" do
 
     it "calculates a new endpoint for a given unit of movement" do
+      subject.endpoint(0).should == [3, 3]
       subject.endpoint(2).should == [3, 1]
+      subject.endpoint(-2).should == [3, 5]
     end
 
     it "steps one unit" do
@@ -109,14 +101,14 @@ describe Turtle do
       subject.rotate(45)
       subject.move(2)
       points = [[3, 3], [4, 2], [5, 1]]
-      points.each { |x, y| subject.canvas.contains?(x, y).should be_true } 
+      points.each { |x, y| subject.canvas.contains?(x, y).should be_true }
     end
 
     it "moves when in 270 degree orientation" do
       subject.rotate(270)
       subject.move(2)
       points = [[3, 3], [2, 3], [1, 3]]
-      points.each { |x, y| subject.canvas.contains?(x, y).should be_true } 
+      points.each { |x, y| subject.canvas.contains?(x, y).should be_true }
     end
 
   end #movement
@@ -145,7 +137,6 @@ describe Turtle do
 
     it "repeats commands" do
       subject.process("REPEAT 2 [ RT 90 FD 2 ]")
-      subject.canvas.points.size.should == 5
       subject.canvas.contains?(5, 5).should be_true
     end
   end

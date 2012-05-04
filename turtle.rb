@@ -1,18 +1,21 @@
+#!/usr/bin/env ruby
+
 class ::Array
   def x
-    self[0] if any? 
+    self[0] if any?
   end
 
   def y
-    self[1] if size > 0  
+    self[1] if size > 0
   end
 end
 
 class Canvas
-  attr_reader :size, :points
+  attr_reader :size, :points, :last
 
   def initialize(size=nil)
-    @points = [] 
+    @points = Hash.new { |hash,key| hash[key] = []} #hash with default value of empty array
+    @last = nil
     self.size = size || 0
   end
 
@@ -23,28 +26,25 @@ class Canvas
   end
 
   def add(x, y)
-    raise "Point [#{x},#{y}] exceeds the canvas bounds" if x > @size || y > @size
-    @points << [x, y] 
+    @points[y] << x
+    @last = [x, y]
     self
   end
 
-  def last
-    @points.last 
-  end
-
   def contains?(x, y)
-    @points.include?([x, y])
+    @points[y] && @points[y].include?(x)
   end
 
-  # Hash keyed by y to speed to_s
-  def to_h
-    @points.inject({}) { |h, pt| (h[pt.y] ? h[pt.y] << pt.x : h[pt.y] = [pt.x]); h } 
+  def format_line(y)
+    chars = []
+    (0...size).each { |x| chars << (contains?(x, y) ? 'X' : '.') }
+    chars.join(' ') + "\n"
   end
 
   def to_s
     s = ''
-    y_hash = self.to_h
-    (0...size).each { |y| chars = Array.new(size, '.'); y_hash[y].each { |x| chars[x] = 'X' } if y_hash[y]; s << chars.join(' ') + "\n" }; s.chomp
+    (0...size).each { |y| s << format_line(y) }
+    s.chomp
   end
 
 end
@@ -59,30 +59,28 @@ class Turtle
   end
 
   def rotate(degrees)
-    @orientation += degrees 
+    @orientation += degrees
     @orientation = @orientation % 360
   end
 
   def size=(s)
-    @canvas.size = s 
+    @canvas.size = s
   end
 
   def right(degrees)
-    rotate(degrees) 
+    rotate(degrees)
   end
 
   def left(degrees)
-    rotate(degrees * -1) 
+    rotate(degrees * -1)
   end
 
   def endpoint_x(units)
-    return @canvas.last.x if @orientation == 0 || @orientation == 180 
-    ((@orientation < 180 ? 1 : -1) * units) + @canvas.last.x
+    ([0, 1, 1, 1, 0, -1, -1, -1][ @orientation / 45] * units) + @canvas.last.x
   end
 
   def endpoint_y(units)
-    return @canvas.last.y if @orientation == 90 || @orientation == 270
-    ((@orientation > 270 || @orientation < 90  ? -1 : 1) * units) + @canvas.last.y
+    ([-1, -1, 0, 1, 1, 1, 0, -1][ @orientation / 45] * units) + @canvas.last.y
   end
 
   def endpoint(units)
@@ -90,7 +88,7 @@ class Turtle
   end
 
   def step_axis(current, target)
-    return current if current == target 
+    return current if current == target
     current + (target > current ? 1 : -1)
   end
 
@@ -102,11 +100,11 @@ class Turtle
 
   def move(units)
     move_to = endpoint(units)
-    @canvas.add(*step(@canvas.last, move_to)) until(@canvas.last == move_to) 
+    @canvas.add(*step(@canvas.last, move_to)) until(@canvas.last == move_to)
   end
 
   def to_s
-    @canvas.to_s 
+    @canvas.to_s
   end
 
   # Command aliases
@@ -119,7 +117,7 @@ class Turtle
   end
 
   def process_cmd(str)
-    method, arg = str.split 
+    method, arg = str.split
     execute(method, arg)
   end
 
@@ -128,7 +126,7 @@ class Turtle
   end
 
   def split_cmds(str)
-    parts = str.strip.split 
+    parts = str.strip.split
     (0...(parts.size / 2)).inject([]) { |arr, idx| arr << [parts[idx * 2], parts[(idx * 2) + 1]]; arr }
   end
 
@@ -139,7 +137,7 @@ class Turtle
   end
 
   def process(str)
-    str.split("\n").each { |line| (line =~ /REPEAT/ ? repeat(line) : process_cmd(line)) } 
+    str.split("\n").each { |line| (line =~ /REPEAT/ ? repeat(line) : process_cmd(line)) }
   end
 
 end
