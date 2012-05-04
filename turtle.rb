@@ -36,15 +36,11 @@ class Canvas
   end
 
   def format_line(y)
-    chars = []
-    (0...size).each { |x| chars << (contains?(x, y) ? 'X' : '.') }
-    chars.join(' ') + "\n"
+    (0...size).map { |x| (contains?(x, y) ? 'X' : '.') }.join(' ')
   end
 
   def to_s
-    s = ''
-    (0...size).each { |y| s << format_line(y) }
-    s.chomp
+    (0...size).map { |y| format_line(y) }.join("\n")
   end
 
 end
